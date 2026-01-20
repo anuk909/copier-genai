@@ -67,24 +67,24 @@ Issues = "https://bitbucket.org/{{ repository_namespace }}/{{ repository_name }}
 dependencies = [
     "pyyaml>=6.0.0",
     "python-dotenv>=1.0.0",
-{% if provider == "openai" %}
-    # "openai>=1.0.0",  # Uncomment when ready
-{% elif provider == "claude" %}
-    # "anthropic>=0.20.0",  # Uncomment when ready
-{% elif provider == "ollama" or provider == "vllm" %}
+{%- if provider == "openai" %}
+    "openai>=1.0.0",
+{%- elif provider == "claude" %}
+    "anthropic>=0.20.0",
+{%- elif provider == "ollama" or provider == "vllm" %}
     "httpx>=0.25.0",
-{% endif %}
-{% if include_rag %}
-{% if vector_db == "chromadb" %}
-    # "chromadb>=0.4.0",  # Uncomment when ready
-{% elif vector_db == "qdrant" %}
-    # "qdrant-client>=1.7.0",  # Uncomment when ready
-{% elif vector_db == "pinecone" %}
-    # "pinecone-client>=3.0.0",  # Uncomment when ready
-{% elif vector_db == "weaviate" %}
-    # "weaviate-client>=4.0.0",  # Uncomment when ready
-{% endif %}
-{% endif %}
+{%- endif %}
+{%- if include_rag %}
+{%- if vector_db == "chromadb" %}
+    "chromadb>=0.4.0",
+{%- elif vector_db == "qdrant" %}
+    "qdrant-client>=1.7.0",
+{%- elif vector_db == "pinecone" %}
+    "pinecone-client>=3.0.0",
+{%- elif vector_db == "weaviate" %}
+    "weaviate-client>=4.0.0",
+{%- endif %}
+{%- endif %}
 ]
 
 

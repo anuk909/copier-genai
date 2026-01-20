@@ -39,20 +39,25 @@ class ModelFactory:
             config["provider"] = provider
         config.update(kwargs)
         
-        provider = config.get("provider", "openai")
+        provider = config.get("provider", "{{ provider }}")
         
-        # TODO: Import and instantiate provider-specific clients
-        # Example:
-        # if provider == "openai":
-        #     from .openai_client import OpenAIClient
-        #     return OpenAIClient(**config)
-        # elif provider == "claude":
-        #     from .claude_client import ClaudeClient
-        #     return ClaudeClient(**config)
+{%- if provider == "openai" %}
+        if provider == "openai":
+            from .openai_client import OpenAIClient
+            return OpenAIClient(**config)
+{%- elif provider == "claude" %}
+        if provider == "claude":
+            from .claude_client import ClaudeClient
+            return ClaudeClient(**config)
+{%- elif provider == "ollama" or provider == "vllm" %}
+        if provider in ["ollama", "vllm"]:
+            from .ollama_client import OllamaClient
+            return OllamaClient(**config)
+{%- endif %}
         
         raise NotImplementedError(
             f"Provider '{provider}' not yet implemented. "
-            f"Create a client in src/core/{provider}_client.py implementing BaseLLM."
+            f"Create a client in src/core/{{'{provider}'}}_client.py implementing BaseLLM."
         )
     
     @staticmethod

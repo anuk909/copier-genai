@@ -33,37 +33,9 @@ pipx install copier
 pipx inject copier copier-templates-extensions
 ```
 
-### Interactive Setup
+## Quick Start
 
-Copier will ask you questions to customize your project:
-
-- **Project name**: Your GenAI project name
-- **LLM Provider**: Choose from OpenAI, Claude, Ollama, or vLLM
-- **RAG Support**: Enable/disable retrieval augmented generation
-- **Vector Database**: Select ChromaDB, Qdrant, Pinecone, or Weaviate
-- **Docker**: Include Docker configuration
-- **Python Version**: Choose 3.11, 3.12, or 3.13
-- **License**: MIT, Apache-2.0, BSD-3-Clause, or None
-
-## Template Structure
-
-The generated project will have this structure:
-
-```
-your-project/
-├── config/
-│   ├── model_config.yaml      # LLM and RAG configuration
-│   └── logging_config.yaml    # Logging setup
-├── data/
-│   ├── cache/                 # Response cache
-│   ├── embeddings/            # Embedding storage
-│   └── vectordb/              # Vector database files
-├── src/
-│   ├── core/                  # LLM abstraction layer
-│   │   ├── base_llm.py        # Base interface
-```
-
-## Quick Setup and Usage
+### Generate Your Project
 
 Make sure all the requirements are met, then:
 
@@ -83,7 +55,7 @@ Or from a local clone:
 copier copy --trust /path/to/copier-genai my-genai-project
 ```
 
-### After Generation
+### Set Up Your Project
 
 ```bash
 cd my-genai-project
@@ -92,7 +64,7 @@ cp .env.example .env       # Configure API keys
 uv run pytest              # Run tests
 ```
 
-## What You Get
+## Project Structure
 
 ```
 your-project/
@@ -109,7 +81,7 @@ your-project/
 └── AGENTS.md              # Guide for AI coding assistants
 ```
 
-## Template Options
+## Configuration Options
 
 When you run the template, you'll be prompted for:
 
@@ -130,8 +102,7 @@ The template automatically:
 
 ## Credits
 
-Inspired by [Prashant Rathi's](https://medium.com/@PrashantRathhttps://medium.com/@PrashantRath) approach to production-ready GenAI architecture.
-And [copier-uv](https://github.com/pawamoy/copier-uv) - General Python projects with uv
+Inspired by [Prashant Rathi's](https://medium.com/@PrashantRath) approach to production-ready GenAI architecture and [copier-uv](https://github.com/pawamoy/copier-uv) for Python project templates with uv.
 
 ## License
 

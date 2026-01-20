@@ -65,7 +65,62 @@ cp .env.example .env
 
 ---
 
-## 💻 Development
+## � Updating from Template
+
+This project was generated from the [copier-genai](https://github.com/anuk909/copier-genai) template. When the template receives updates (bug fixes, new features, or improvements), you can update your project to incorporate these changes.
+
+### Update to Latest Template Version
+
+```bash
+# Update to the latest template version
+copier update
+```
+
+Copier will:
+1. Check for template updates
+2. Show you what has changed
+3. Apply updates while preserving your customizations
+4. Prompt you to resolve any conflicts
+
+### Update to Specific Template Version
+
+```bash
+# Update to a specific version or tag
+copier update --vcs-ref=v1.2.0
+```
+
+### Preview Changes Before Applying
+
+```bash
+# See what would change without applying updates
+copier update --pretend
+```
+
+### Important Notes
+
+- **Backup First**: Commit your changes to git before updating
+- **Review Changes**: Copier will show you a diff of changes
+- **Conflict Resolution**: You may need to manually resolve conflicts in customized files
+- **Test After Update**: Run your test suite after updating: `uv run pytest`
+- **Template Answers**: Your original template answers are stored in `.copier-answers.yml`
+
+### Troubleshooting Updates
+
+If you encounter issues:
+
+```bash
+# Force recopy (WARNING: may overwrite customizations)
+copier update --force
+
+# Skip specific files during update
+copier update --skip="path/to/file.py"
+```
+
+For more information, see the [Copier documentation](https://copier.readthedocs.io/en/stable/updating/).
+
+---
+
+## �💻 Development
 
 ### Pre-commit Hooks
 

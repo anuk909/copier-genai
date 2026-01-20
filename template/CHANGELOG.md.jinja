@@ -1,0 +1,46 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Initial project setup with {{ provider }} LLM provider
+{%- if include_rag %}
+- RAG module with {{ vector_db }} vector database
+{%- endif %}
+- Core LLM client implementations
+- Configuration management system
+- Comprehensive testing setup
+- Pre-commit hooks for code quality
+{%- if include_docker %}
+- Docker containerization support
+{%- endif %}
+
+### Changed
+- Nothing yet
+
+### Deprecated
+- Nothing yet
+
+### Removed
+- Nothing yet
+
+### Fixed
+- Nothing yet
+
+### Security
+- Nothing yet
+
+## [0.1.0] - {{ copyright_date }}
+
+### Added
+- Initial release
+- Project structure and scaffolding
+- Basic documentation
+
+[Unreleased]: https://{{ repository_provider }}/{{ repository_namespace }}/{{ repository_name }}/compare/v0.1.0...HEAD
+[0.1.0]: https://{{ repository_provider }}/{{ repository_namespace }}/{{ repository_name }}/releases/tag/v0.1.0

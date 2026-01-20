@@ -1,0 +1,16 @@
+[pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts = 
+    --strict-markers
+    --strict-config
+    --cov={{ python_package_import_name }}
+    --cov-report=html
+    --cov-report=term-missing:skip-covered
+    --cov-report=xml
+markers =
+    slow: marks tests as slow (deselect with '-m "not slow"')
+    integration: marks tests as integration tests
+    unit: marks tests as unit tests

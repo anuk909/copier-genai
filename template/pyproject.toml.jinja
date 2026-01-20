@@ -1,7 +1,7 @@
 # ---- Project Info and Dependencies ----
 
 [project]
-name = "{{ project_slug }}"
+name = "{{ python_package_distribution_name }}"
 description = "{{ project_description }}"
 {% if author_name or author_email -%}
 authors = [
@@ -9,24 +9,12 @@ authors = [
 ]
 {% endif -%}
 readme = "README.md"
-{% if license != "None" -%}
-license = "{{ license }}"
+{% if copyright_license and copyright_license != "None" -%}
+license = "{{ copyright_license }}"
+license-files = ["LICENSE"]
 {% endif -%}
 requires-python = ">={{ python_version }},<4.0"
-
-{% if repository_namespace and repository_name -%}
-[project.urls]
-{% if repository_provider == "github.com" -%}
-Repository = "https://github.com/{{ repository_namespace }}/{{ repository_name }}"
-Issues = "https://github.com/{{ repository_namespace }}/{{ repository_name }}/issues"
-{% elif repository_provider == "gitlab.com" -%}
-Repository = "https://gitlab.com/{{ repository_namespace }}/{{ repository_name }}"
-Issues = "https://gitlab.com/{{ repository_namespace }}/{{ repository_name }}/-/issues"
-{% elif repository_provider == "bitbucket.org" -%}
-Repository = "https://bitbucket.org/{{ repository_namespace }}/{{ repository_name }}"
-Issues = "https://bitbucket.org/{{ repository_namespace }}/{{ repository_name }}/issues"
-{% endif -%}
-{% endif -%}
+keywords = ["genai", "llm", "ai"]
 dynamic = ["version"]
 
 classifiers = [
@@ -35,11 +23,43 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: {{ python_version }}",
+    "Programming Language :: Python :: 3 :: Only",
+{%- if python_version == "3.11" %}
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+{%- elif python_version == "3.12" %}
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+{%- elif python_version == "3.13" %}
+    "Programming Language :: Python :: 3.13",
+{%- endif %}
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
-    # Include this to avoid accidentally publishing to PyPI:
-    "Private :: Do Not Upload",
 ]
+
+{% if repository_namespace and repository_name -%}
+[project.urls]
+{% if repository_provider == "github.com" -%}
+Homepage = "https://{{ repository_namespace }}.github.io/{{ repository_name }}"
+Documentation = "https://{{ repository_namespace }}.github.io/{{ repository_name }}"
+Repository = "https://github.com/{{ repository_namespace }}/{{ repository_name }}"
+Issues = "https://github.com/{{ repository_namespace }}/{{ repository_name }}/issues"
+Changelog = "https://github.com/{{ repository_namespace }}/{{ repository_name }}/blob/main/CHANGELOG.md"
+{% elif repository_provider == "gitlab.com" -%}
+Repository = "https://gitlab.com/{{ repository_namespace }}/{{ repository_name }}"
+Issues = "https://gitlab.com/{{ repository_namespace }}/{{ repository_name }}/-/issues"
+{% elif repository_provider == "bitbucket.org" -%}
+Repository = "https://bitbucket.org/{{ repository_namespace }}/{{ repository_name }}"
+Issues = "https://bitbucket.org/{{ repository_namespace }}/{{ repository_name }}/issues"
+{% endif -%}
+{% endif -%}
+
+{% if python_package_command_line_name -%}
+[project.scripts]
+{{ python_package_command_line_name }} = "{{ python_package_import_name }}.cli:main"
+{% endif %}
 
 
 # ---- Main dependencies ----
@@ -98,7 +118,7 @@ bump = true
 fallback-version = "0.1.0"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/{{ project_module }}"]
+packages = ["src/{{ python_package_import_name }}"]
 
 
 # ---- Settings ----

@@ -15,9 +15,11 @@ _envops:
 
 _jinja_extensions:
   - copier_templates_extensions.TemplateExtensionLoader
-  - extensions:CurrentYearExtension
-  - extensions:GitExtension
-  - extensions:SlugifyExtension
+  - extensions.py:GitExtension
+  - extensions.py:SlugifyExtension
+  - extensions.py:CurrentYearExtension
+  - jinja2.ext.do
+  - jinja2.ext.loopcontrols
 
 _skip_if_exists:
   - .env
@@ -26,28 +28,39 @@ _skip_if_exists:
 
 # MESSAGE AFTER COPY --------------------
 _message_after_copy: |
-  Your GenAI project "{{ project_name }}" has been created!
+  Your GenAI project "{{ project_name }}" has been created successfully!
 
   Next steps:
+    1. Navigate to your project:
+       cd {{ project_slug }}
 
-  cd {{ project_slug }}
-  git init
+    2. Initialize git repository:
+       git init
 
-  # Setup your development environment:
-  bash scripts/setup_env.sh
+    3. Set up development environment:
+       bash scripts/setup_env.sh
+       # This will:
+       # - Create a virtual environment with uv
+       # - Install all dependencies
+       # - Set up pre-commit hooks
 
-  # This will install dependencies and pre-commit hooks automatically
+    4. Configure your LLM provider:
+       # Edit config/model_config.yaml
+       # Add API keys to .env (copy from .env.example)
 
-  # Configure your LLM provider in config/model_config.yaml
-  # Add your API keys to .env (copy from .env.example)
+    5. Run tests to verify setup:
+       make test
+       # Or: uv run pytest
 
-  # Run tests:
-  uv run pytest
+    6. Start developing:
+       make help  # See all available commands
 
-  # Format code:
-  uv run ruff format .
+  Documentation:
+    - README.md: Project overview and usage
+    - AGENTS.md: AI agent development guide
+    - config/: Configuration files
 
-  # Pre-commit will run automatically on git commits
+  Happy coding!
 
 # PROMPT --------------------------------
 
@@ -59,13 +72,23 @@ project_name:
 
 project_slug:
   type: str
-  help: "Project slug (used for directory and package name)"
+  help: "Project slug (used for directory name)"
   default: "{{ project_name|lower|replace(' ', '-')|replace('_', '-') }}"
 
-project_module:
+python_package_distribution_name:
   type: str
-  help: "Python module name (use snake_case)"
-  default: "{{ project_name|lower|replace(' ', '_')|replace('-', '_') }}"
+  help: "Python package distribution name (for 'pip install NAME')"
+  default: "{{ project_name | slugify }}"
+
+python_package_import_name:
+  type: str
+  help: "Python package import name (for 'import NAME' in Python code)"
+  default: "{{ project_name | slugify('_') }}"
+
+python_package_command_line_name:
+  type: str
+  help: "CLI name if any (for use in the shell)"
+  default: "{{ project_name | slugify }}"
 
 project_description:
   type: str
@@ -83,6 +106,11 @@ author_email:
   help: "Author email"
   default: "{{ '' | git_user_email }}"
 
+author_username:
+  type: str
+  help: "Your username (e.g. on GitHub)"
+  default: "{{ author_name | slugify }}"
+
 repository_provider:
   type: str
   help: "Repository provider"
@@ -95,7 +123,7 @@ repository_provider:
 repository_namespace:
   type: str
   help: "Repository namespace (organization or username)"
-  default: "{{ author_name | slugify }}"
+  default: "{{ author_username }}"
 
 repository_name:
   type: str
@@ -161,18 +189,12 @@ python_version:
   default: "3.12"
 
 # License
-license:
+copyright_license:
   type: str
-  help: "Choose a license"
+  help: "Your project's license"
+  default: MIT
   choices:
-    ISC License: ISC
     MIT License: MIT
     Apache License 2.0: Apache-2.0
-    BSD 2-Clause "Simplified" License: BSD-2-Clause
     BSD 3-Clause "New" or "Revised" License: BSD-3-Clause
-    GNU General Public License v3.0: GPL-3.0
-    GNU Lesser General Public License v3.0: LGPL-3.0
-    Mozilla Public License 2.0: MPL-2.0
-    The Unlicense: Unlicense
     No License (Proprietary): None
-  default: MIT

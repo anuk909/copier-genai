@@ -1,0 +1,51 @@
+.PHONY: help setup test format lint clean coverage docs run
+
+help:  ## Show this help message
+	@echo 'Usage: make [target]'
+	@echo ''
+	@echo 'Available targets:'
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+setup:  ## Set up the development environment
+	@uv sync --all-extras
+	@uv run pre-commit install
+
+test:  ## Run tests with pytest
+	@uv run pytest -v
+
+test-cov:  ## Run tests with coverage report
+	@uv run pytest -v --cov={{ python_package_import_name }} --cov-report=html --cov-report=term
+
+format:  ## Format code with ruff
+	@uv run ruff format .
+
+lint:  ## Lint code with ruff
+	@uv run ruff check . --fix
+
+check:  ## Run all checks (format, lint, type-check)
+	@uv run ruff format --check .
+	@uv run ruff check .
+	@uv run basedpyright
+
+type-check:  ## Run type checking with basedpyright
+	@uv run basedpyright
+
+clean:  ## Clean up temporary files and caches
+	@rm -rf .coverage htmlcov/ .pytest_cache/ .ruff_cache/
+	@find . -type d -name __pycache__ -exec rm -rf {} +
+	@find . -type f -name '*.pyc' -delete
+
+docs:  ## Build and serve documentation
+	@echo "Documentation not yet configured"
+
+run:  ## Run the application
+	@uv run python -m {{ python_package_import_name }}
+
+build:  ## Build package
+	@uv build
+
+publish-test:  ## Publish to TestPyPI
+	@uv publish --publish-url https://test.pypi.org/legacy/
+
+publish:  ## Publish to PyPI
+	@uv publish

@@ -5,6 +5,7 @@ This document provides guidance for AI coding assistants working with this Copie
 ## Project Overview
 
 This is a Copier template that generates production-ready GenAI projects with:
+
 - Multiple LLM provider support (OpenAI, Claude, Ollama)
 - RAG (Retrieval-Augmented Generation) capabilities
 - Vector embeddings and storage
@@ -97,6 +98,7 @@ copier copy . /path/to/test-output \
 #### Modifying Dependencies
 
 Edit `template/pyproject.toml.jinja`:
+
 - Core dependencies in `[project.dependencies]`
 - Optional dependencies in `[project.optional-dependencies]`
 - Use Jinja2 conditionals for provider-specific deps
@@ -123,6 +125,7 @@ Edit `template/pyproject.toml.jinja`:
 ### LLM Client Pattern
 
 All LLM clients inherit from `BaseLLM` and implement:
+
 - `generate()`: Single response generation
 - `stream()`: Streaming responses
 - `get_model_info()`: Model metadata

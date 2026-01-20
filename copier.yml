@@ -1,0 +1,178 @@
+# ======================================================================================
+# COPIER TEMPLATE FOR GENERAI PROJECTS
+# https://copier.readthedocs.io/
+# ======================================================================================
+
+# CONFIGURATION -------------------------
+_min_copier_version: "9.4.0"
+_subdirectory: template
+_templates_suffix: .jinja
+_preserve_symlinks: true
+
+_envops:
+  autoescape: false
+  keep_trailing_newline: true
+
+_jinja_extensions:
+  - copier_templates_extensions.TemplateExtensionLoader
+  - extensions:CurrentYearExtension
+  - extensions:GitExtension
+  - extensions:SlugifyExtension
+
+_skip_if_exists:
+  - .env
+  - data/
+  - CHANGELOG.md
+
+# MESSAGE AFTER COPY --------------------
+_message_after_copy: |
+  Your GenAI project "{{ project_name }}" has been created!
+
+  Next steps:
+
+  cd {{ project_slug }}
+  git init
+
+  # Setup your development environment:
+  bash scripts/setup_env.sh
+
+  # This will install dependencies and pre-commit hooks automatically
+
+  # Configure your LLM provider in config/model_config.yaml
+  # Add your API keys to .env (copy from .env.example)
+
+  # Run tests:
+  uv run pytest
+
+  # Format code:
+  uv run ruff format .
+
+  # Pre-commit will run automatically on git commits
+
+# PROMPT --------------------------------
+
+# Project Metadata
+project_name:
+  type: str
+  help: "What is the name of your GenAI project?"
+  default: "my-genai-app"
+
+project_slug:
+  type: str
+  help: "Project slug (used for directory and package name)"
+  default: "{{ project_name|lower|replace(' ', '-')|replace('_', '-') }}"
+
+project_module:
+  type: str
+  help: "Python module name (use snake_case)"
+  default: "{{ project_name|lower|replace(' ', '_')|replace('-', '_') }}"
+
+project_description:
+  type: str
+  help: "Brief description of your project"
+  default: "A scalable Generative AI application"
+
+# Author Information
+author_name:
+  type: str
+  help: "Author full name"
+  default: "{{ '' | git_user_name }}"
+
+author_email:
+  type: str
+  help: "Author email"
+  default: "{{ '' | git_user_email }}"
+
+repository_provider:
+  type: str
+  help: "Repository provider"
+  default: github.com
+  choices:
+    - github.com
+    - gitlab.com
+    - bitbucket.org
+
+repository_namespace:
+  type: str
+  help: "Repository namespace (organization or username)"
+  default: "{{ author_name | slugify }}"
+
+repository_name:
+  type: str
+  help: "Repository name"
+  default: "{{ project_name | slugify }}"
+
+copyright_holder:
+  type: str
+  help: "Copyright holder name"
+  default: "{{ author_name }}"
+
+copyright_holder_email:
+  type: str
+  help: "Copyright holder email"
+  default: "{{ author_email }}"
+
+copyright_date:
+  type: str
+  help: "Copyright date"
+  default: "{{ current_year }}"
+
+# LLM Provider Selection
+provider:
+  type: str
+  help: "Which LLM provider are you starting with?"
+  choices:
+    - openai
+    - claude
+    - ollama
+    - vllm
+  default: openai
+
+# RAG Configuration
+include_rag:
+  type: bool
+  help: "Do you need a RAG module (Vector DB/Embeddings)?"
+  default: true
+
+vector_db:
+  type: str
+  help: "Which vector database to use?"
+  choices:
+    - chromadb
+    - qdrant
+    - pinecone
+    - weaviate
+  default: chromadb
+  when: "{{ include_rag }}"
+
+# Additional Features
+include_docker:
+  type: bool
+  help: "Include Docker configuration?"
+  default: true
+
+python_version:
+  type: str
+  help: "Python version to use"
+  choices:
+    - "3.11"
+    - "3.12"
+    - "3.13"
+  default: "3.12"
+
+# License
+license:
+  type: str
+  help: "Choose a license"
+  choices:
+    ISC License: ISC
+    MIT License: MIT
+    Apache License 2.0: Apache-2.0
+    BSD 2-Clause "Simplified" License: BSD-2-Clause
+    BSD 3-Clause "New" or "Revised" License: BSD-3-Clause
+    GNU General Public License v3.0: GPL-3.0
+    GNU Lesser General Public License v3.0: LGPL-3.0
+    Mozilla Public License 2.0: MPL-2.0
+    The Unlicense: Unlicense
+    No License (Proprietary): None
+  default: MIT

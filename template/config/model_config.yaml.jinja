@@ -1,0 +1,99 @@
+# Model Configuration for {{ project_name }}
+# Adjust these settings based on your use case
+
+model:
+  provider: "{{ provider }}"
+  
+  # OpenAI Configuration
+  {% if provider == "openai" -%}
+  name: "gpt-4-turbo-preview"
+  api_version: "2024-01-01"
+  max_tokens: 4096
+  temperature: 0.7
+  top_p: 1.0
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+  {% elif provider == "claude" -%}
+  # Anthropic Claude Configuration
+  name: "claude-3-opus-20240229"
+  max_tokens: 4096
+  temperature: 0.7
+  {% elif provider == "ollama" -%}
+  # Ollama Local Configuration
+  name: "llama2"
+  base_url: "http://localhost:11434"
+  temperature: 0.7
+  {% elif provider == "vllm" -%}
+  # vLLM Configuration
+  name: "meta-llama/Llama-2-7b-chat-hf"
+  base_url: "http://localhost:8000"
+  temperature: 0.7
+  max_tokens: 2048
+  {% else -%}
+  # Local/Custom Configuration
+  name: "custom-model"
+  temperature: 0.7
+  {% endif -%}
+
+# Retry and Rate Limiting
+retry:
+  max_attempts: 3
+  backoff_factor: 2
+  max_wait_time: 60
+
+rate_limit:
+  requests_per_minute: 60
+  tokens_per_minute: 90000
+
+# Timeout Settings
+timeout:
+  connection: 10
+  read: 60
+  write: 10
+
+{% if include_rag -%}
+# RAG Configuration
+rag:
+  vector_db: "{{ vector_db }}"
+  embedding_model: "text-embedding-ada-002"
+  chunk_size: 1000
+  chunk_overlap: 200
+  top_k: 5
+  similarity_threshold: 0.7
+  
+  # Vector Database Specific Settings
+  {% if vector_db == "chromadb" -%}
+  chroma:
+    persist_directory: "./data/vectordb"
+    collection_name: "{{ project_slug }}_collection"
+  {% elif vector_db == "pinecone" -%}
+  pinecone:
+    environment: "us-west1-gcp"
+    index_name: "{{ project_slug }}-index"
+    dimension: 1536
+  {% elif vector_db == "weaviate" -%}
+  weaviate:
+    url: "http://localhost:8080"
+    class_name: "{{ project_name | replace('-', '_') | title }}Document"
+  {% elif vector_db == "qdrant" -%}
+  qdrant:
+    url: "http://localhost:6333"
+    collection_name: "{{ project_slug }}_collection"
+    vector_size: 1536
+  {% endif -%}
+{% endif -%}
+
+# Caching
+cache:
+  enabled: true
+  ttl: 3600  # seconds
+  max_size: 1000
+  directory: "./data/cache"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "json"
+  log_prompts: true
+  log_responses: true
+  log_file: "logs/{{ project_slug }}.log"

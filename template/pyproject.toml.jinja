@@ -1,0 +1,132 @@
+# ---- Project Info and Dependencies ----
+
+[project]
+name = "{{ project_slug }}"
+description = "{{ project_description }}"
+{% if author_name or author_email -%}
+authors = [
+    { name = "{{ author_name }}"{% if author_email %}, email = "{{ author_email }}"{% endif %} },
+]
+{% endif -%}
+readme = "README.md"
+{% if license != "None" -%}
+license = "{{ license }}"
+{% endif -%}
+requires-python = ">={{ python_version }},<4.0"
+
+{% if repository_namespace and repository_name -%}
+[project.urls]
+{% if repository_provider == "github.com" -%}
+Repository = "https://github.com/{{ repository_namespace }}/{{ repository_name }}"
+Issues = "https://github.com/{{ repository_namespace }}/{{ repository_name }}/issues"
+{% elif repository_provider == "gitlab.com" -%}
+Repository = "https://gitlab.com/{{ repository_namespace }}/{{ repository_name }}"
+Issues = "https://gitlab.com/{{ repository_namespace }}/{{ repository_name }}/-/issues"
+{% elif repository_provider == "bitbucket.org" -%}
+Repository = "https://bitbucket.org/{{ repository_namespace }}/{{ repository_name }}"
+Issues = "https://bitbucket.org/{{ repository_namespace }}/{{ repository_name }}/issues"
+{% endif -%}
+{% endif -%}
+dynamic = ["version"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: {{ python_version }}",
+    "Typing :: Typed",
+    # Include this to avoid accidentally publishing to PyPI:
+    "Private :: Do Not Upload",
+]
+
+
+# ---- Main dependencies ----
+
+dependencies = [
+    "pyyaml>=6.0.0",
+    "python-dotenv>=1.0.0",
+{% if provider == "openai" %}
+    # "openai>=1.0.0",  # Uncomment when ready
+{% elif provider == "claude" %}
+    # "anthropic>=0.20.0",  # Uncomment when ready
+{% elif provider == "ollama" or provider == "vllm" %}
+    "httpx>=0.25.0",
+{% endif %}
+{% if include_rag %}
+{% if vector_db == "chromadb" %}
+    # "chromadb>=0.4.0",  # Uncomment when ready
+{% elif vector_db == "qdrant" %}
+    # "qdrant-client>=1.7.0",  # Uncomment when ready
+{% elif vector_db == "pinecone" %}
+    # "pinecone-client>=3.0.0",  # Uncomment when ready
+{% elif vector_db == "weaviate" %}
+    # "weaviate-client>=4.0.0",  # Uncomment when ready
+{% endif %}
+{% endif %}
+]
+
+
+# ---- Dev dependencies ----
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.8.0",
+    "basedpyright>=1.20.0",
+    "pre-commit>=4.0.0",
+]
+
+
+# ---- Build system ----
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "pep440"
+bump = true
+# Fallback version when git is not initialized
+fallback-version = "0.1.0"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{ project_module }}"]
+
+
+# ---- Settings ----
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "I",   # isort
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]
+
+[tool.basedpyright]
+include = ["src", "tests"]
+reportMissingTypeStubs = false
+reportUnusedCallResult = false
+reportAny = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"

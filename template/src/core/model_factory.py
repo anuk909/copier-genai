@@ -1,0 +1,76 @@
+"""
+Model Factory
+
+Factory pattern for creating LLM instances based on configuration.
+"""
+
+import os
+import yaml
+from pathlib import Path
+from typing import Optional, Dict, Any
+
+from .base_llm import BaseLLM
+
+
+class ModelFactory:
+    """Factory for creating LLM instances"""
+    
+    @staticmethod
+    def create(provider: Optional[str] = None, **kwargs) -> BaseLLM:
+        """
+        Create an LLM instance based on the provider.
+        
+        Args:
+            provider: LLM provider name (openai, claude, ollama, etc.)
+            **kwargs: Additional configuration options
+            
+        Returns:
+            BaseLLM: Configured LLM instance
+            
+        Example:
+            >>> model = ModelFactory.create(provider="openai", model_name="gpt-4")
+            >>> response = model.generate([Message(role="user", content="Hello")])
+        """
+        # Load configuration from config/model_config.yaml
+        config = ModelFactory._load_config()
+        
+        # Override with explicit parameters
+        if provider:
+            config["provider"] = provider
+        config.update(kwargs)
+        
+        provider = config.get("provider", "openai")
+        
+        # TODO: Import and instantiate provider-specific clients
+        # Example:
+        # if provider == "openai":
+        #     from .openai_client import OpenAIClient
+        #     return OpenAIClient(**config)
+        # elif provider == "claude":
+        #     from .claude_client import ClaudeClient
+        #     return ClaudeClient(**config)
+        
+        raise NotImplementedError(
+            f"Provider '{provider}' not yet implemented. "
+            f"Create a client in src/core/{provider}_client.py implementing BaseLLM."
+        )
+    
+    @staticmethod
+    def _load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Load configuration from YAML file.
+        
+        Args:
+            config_path: Path to config file (default: config/model_config.yaml)
+            
+        Returns:
+            Dict containing configuration
+        """
+        if config_path is None:
+            config_path = Path(__file__).parent.parent.parent / 'config' / 'model_config.yaml'
+        
+        config_file = Path(config_path)
+        if config_file.exists():
+            with open(config_file, 'r') as f:
+                return yaml.safe_load(f) or {}
+        return {}

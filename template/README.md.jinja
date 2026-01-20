@@ -1,0 +1,136 @@
+# {{ project_name }}
+
+{{ project_description }}
+
+> Generated with [copier-genai](https://github.com/yourorg/copier-genai) template{% if author_name %}  
+> Author: {{ author_name }}{% if author_email %} <{{ author_email }}>{% endif %}{% endif %}
+
+---
+
+## 🏗 Project Architecture
+
+This project follows the **Clean GenAI Structure** pattern, designed for production-grade AI applications with a focus on:
+
+- **Separation of Concerns**: Clear boundaries between retrieval, inference, and processing
+- **Vendor Agnosticism**: Easy switching between LLM providers (OpenAI, Claude, Ollama, etc.)
+- **Testability**: Prompts and model outputs are treated as code with comprehensive tests
+- **Scalability**: Modular architecture supports growth from prototype to production
+
+### Directory Structure
+
+| Directory | Purpose |
+|-----------|---------|
+| `config/` | Environment and model parameters (YAML configs) |
+| `data/` | Local storage for vector DBs, embeddings, and caches |
+| `src/core/` | **LLM Abstraction Layer** - ModelFactory and provider clients |
+| `src/prompts/` | Versioned prompt templates and chaining logic |
+| {% if include_rag %}`src/rag/` | Retrieval logic, indexing, and vector store wrappers |{% endif %}
+| `src/processing/` | Data cleaning, chunking, and tokenization utilities |
+| `src/inference/` | Execution engine and output parsers |
+| `tests/` | Unit tests for prompts and integration tests |
+| `scripts/` | Utility scripts for setup and testing |
+| {% if include_docker %}`Dockerfile` | Container configuration for deployment |{% endif %}
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Python {{ python_version }}+**
+- **[uv](https://docs.astral.sh/uv/)** - Fast Python package manager
+{% if include_docker %}- **Docker** (optional, for containerized deployment){% endif %}
+- **API Keys** (stored in `.env`)
+
+### Installation
+
+1. **Setup Environment**:
+```bash
+bash scripts/setup_env.sh
+```
+
+This will:
+- Install uv if not present
+- Install all dependencies with uv
+- Create necessary directories
+
+2. **Configure Models**:
+Edit `config/model_config.yaml` to set your model parameters.
+
+3. **Set API Keys**:
+```bash
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+---
+
+## 💻 Development
+
+### Pre-commit Hooks
+
+This project uses [pre-commit](https://pre-commit.com/) to ensure code quality. Hooks are automatically installed during setup and will run on every commit.
+
+Manual commands:
+```bash
+# Run pre-commit on all files
+uv run pre-commit run --all-files
+
+# Skip pre-commit on a specific commit (not recommended)
+git commit --no-verify
+```
+
+### Common Development Tasks
+
+```bash
+# Run tests
+uv run pytest tests/ -v
+
+# Run tests with coverage
+uv run pytest tests/ --cov=src --cov-report=html --cov-report=term
+
+# Format code
+uv run ruff format src/ tests/
+
+# Lint code
+uv run ruff check src/ tests/
+
+# Type checking
+uv run basedpyright src/ tests/
+
+# Clean cache and temporary files
+uv run python scripts/cleanup.py --all
+
+# Build embeddings (if using RAG)
+uv run python scripts/build_embeddings.py --input data/documents/
+```
+
+---
+
+## 🧪 Testing
+
+We treat prompts as code. Run the test suite:
+
+```bash
+uv run pytest
+```
+
+{% if include_docker %}
+---
+
+## 🐳 Docker
+
+```bash
+docker compose up --build
+```
+{% endif %}
+
+---
+
+## 📄 License
+
+{% if license != "None" -%}
+This project is licensed under the {{ license }} License - see the [LICENSE](LICENSE) file for details.
+{% else -%}
+No license specified.
+{% endif %}

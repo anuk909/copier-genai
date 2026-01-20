@@ -1,0 +1,51 @@
+{% if include_docker -%}
+version: '3.8'
+
+services:
+  {{ project_slug }}:
+    build: .
+    container_name: {{ project_slug }}
+    env_file:
+      - .env
+    ports:
+      {% if include_api -%}
+      - "8000:8000"
+      {% endif -%}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    restart: unless-stopped
+{% if include_rag and vector_db == "chromadb" %}
+  
+  # No additional services needed for ChromaDB (embedded)
+{% elif include_rag and vector_db == "weaviate" %}
+  
+  weaviate:
+    image: semitechnologies/weaviate:latest
+    ports:
+      - "8080:8080"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+
+volumes:
+  weaviate_data:
+{% elif include_rag and vector_db == "qdrant" %}
+  
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  qdrant_data:
+{% endif %}
+{% else -%}
+# Docker Compose not included
+{% endif -%}

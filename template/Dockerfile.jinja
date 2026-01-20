@@ -1,0 +1,36 @@
+{% if include_docker -%}
+# Multi-stage Dockerfile for {{ project_name }}
+FROM python:{{ python_version }}-slim as base
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Copy project files
+COPY pyproject.toml ./
+COPY src/ ./src/
+COPY config/ ./config/
+
+# Install dependencies
+RUN uv sync --frozen
+
+# Create data directories
+RUN mkdir -p data/cache data/embeddings data/vectordb logs
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Default command
+CMD ["uv", "run", "python", "-m", "src.inference.inference_engine"]
+{% else -%}
+# Docker support not included in this project
+# To add Docker support, regenerate with include_docker=true
+{% endif -%}

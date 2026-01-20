@@ -1,0 +1,278 @@
+# AI Agents Guide
+
+This document provides guidance for AI coding assistants working with this GenAI project.
+
+## Project Overview
+
+This is a production-ready GenAI application with:
+- LLM provider support ({{ provider }}){% if include_rag %}
+- RAG (Retrieval-Augmented Generation) capabilities with {{ vector_db }}
+- Vector embeddings and storage{% endif %}
+- Modular architecture with core, inference, processing{% if include_rag %}, and RAG modules{% endif %}
+- Comprehensive testing setup
+{% if include_docker %}- Docker support{% endif %}
+
+## Project Structure
+
+### Core Components
+
+- **`src/core/`**: LLM client implementations
+  - `base_llm.py`: Abstract base class for all LLM clients
+  - `model_factory.py`: Factory pattern for instantiating LLM clients
+  - Provider-specific clients (OpenAI, Claude, Ollama, etc.)
+
+{% if include_rag -%}
+- **`src/rag/`**: RAG components
+  - `embedder.py`: Text to vector embeddings
+  - `vector_store.py`: Vector database operations
+  - `retriever.py`: Document retrieval logic
+  - `indexer.py`: Index building and management
+
+{% endif -%}
+- **`src/prompts/`**: Prompt templates and chain management
+  - `templates.py`: Prompt template definitions
+  - `chain.py`: LLM chain orchestration
+
+- **`src/processing/`**: Text processing utilities
+  - `chunking.py`: Document chunking strategies
+  - `tokenizer.py`: Token counting and text tokenization
+  - `preprocessor.py`: Text preprocessing and cleaning
+
+- **`src/inference/`**: Inference engine and response handling
+  - `inference_engine.py`: Main inference orchestration
+  - `response_parser.py`: Parse and validate LLM responses
+
+- **`tests/`**: Unit and integration tests
+  - `unit/`: Unit tests for individual components
+  - `integration/`: Integration tests for full workflows
+  - `conftest.py`: pytest fixtures and configuration
+
+- **`config/`**: YAML configuration files
+  - `model_config.yaml`: LLM provider settings, API endpoints
+  - `logging_config.yaml`: Logging levels and handlers
+
+- **`scripts/`**: Utility scripts
+  - `setup_env.sh`: Environment setup and dependency installation
+  - `build_embeddings.py`: Build and index embeddings{% if include_rag %}
+  - `cleanup.py`: Clean up cache and temporary files{% endif %}
+
+## Architecture Notes
+
+### LLM Client Pattern
+
+All LLM clients inherit from `BaseLLM` and implement:
+- `generate()`: Single response generation
+- `stream()`: Streaming responses (for real-time output)
+- `get_model_info()`: Model metadata and capabilities
+
+Use `ModelFactory` to instantiate clients based on configuration:
+
+```python
+from src.core.model_factory import ModelFactory
+
+client = ModelFactory.create_client(
+    provider="{{ provider }}",
+    model_name="default"
+)
+```
+
+{% if include_rag -%}
+### RAG Pipeline
+
+The RAG pipeline follows this flow:
+
+1. **Embedder**: Converts text to vectors using embedding models
+2. **VectorStore**: Stores and indexes embeddings in {{ vector_db }}
+3. **Retriever**: Finds relevant documents based on query similarity
+4. **Indexer**: Builds and manages indices for efficient retrieval
+
+Example usage:
+
+```python
+from src.rag.embedder import Embedder
+from src.rag.vector_store import VectorStore
+from src.rag.retriever import Retriever
+
+# Initialize components
+embedder = Embedder()
+vector_store = VectorStore(db_type="{{ vector_db }}")
+retriever = Retriever(vector_store, embedder)
+
+# Index documents
+documents = ["doc1", "doc2", "doc3"]
+vector_store.add_documents(documents)
+
+# Retrieve relevant context
+results = retriever.retrieve("query", top_k=5)
+```
+
+{% endif -%}
+### Configuration Management
+
+- **`config/model_config.yaml`**: LLM provider settings
+  - API endpoints
+  - Model names and parameters
+  - Temperature, max tokens, etc.
+
+- **`config/logging_config.yaml`**: Logging configuration
+  - Log levels (DEBUG, INFO, WARNING, ERROR)
+  - Log handlers (console, file)
+  - Log format
+
+- **Environment Variables** (`.env`):
+  - API keys (never commit these!)
+  - Sensitive configuration
+  - Environment-specific settings
+
+## Development Workflow
+
+### Setup
+
+```bash
+# Install dependencies
+bash scripts/setup_env.sh
+
+# Or manually
+uv pip install -e ".[dev]"
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+### Testing
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run unit tests only
+uv run pytest tests/unit/
+
+# Run with coverage
+uv run pytest --cov=src --cov-report=html
+
+# Run specific test file
+uv run pytest tests/unit/test_llm_clients.py
+```
+
+### Code Quality
+
+```bash
+# Format code
+uv run ruff format .
+
+# Lint code
+uv run ruff check .
+
+# Fix linting issues automatically
+uv run ruff check --fix .
+
+# Type checking (if basedpyright is installed)
+uv run basedpyright
+```
+
+## Common Tasks
+
+### Adding a New LLM Provider
+
+1. Create a new client in `src/core/`:
+   ```python
+   from src.core.base_llm import BaseLLM
+   
+   class NewProviderClient(BaseLLM):
+       def generate(self, prompt: str, **kwargs) -> str:
+           # Implementation
+           pass
+   ```
+
+2. Register in `ModelFactory`
+3. Add configuration to `config/model_config.yaml`
+4. Write tests in `tests/unit/test_llm_clients.py`
+
+{% if include_rag -%}
+### Adding New Vector Database Support
+
+1. Extend `VectorStore` class in `src/rag/vector_store.py`
+2. Implement database-specific methods
+3. Update configuration in `config/model_config.yaml`
+4. Add integration tests
+
+{% endif -%}
+### Adding New Prompt Templates
+
+1. Add template to `src/prompts/templates.py`
+2. Use Jinja2 syntax for variable interpolation
+3. Add validation and tests
+
+## Best Practices
+
+### For AI Agents
+
+1. **Read Configuration First**: Always check `config/` files before making changes
+2. **Follow Type Hints**: Use type annotations for better code quality
+3. **Test Before Deploy**: Run tests after any changes
+4. **Log Appropriately**: Use the logging framework, don't use `print()`
+5. **Handle Errors**: Implement proper error handling and fallbacks
+6. **Document Changes**: Update docstrings and comments
+
+### Code Style
+
+- Follow PEP 8 conventions
+- Use type hints for all functions
+- Write descriptive docstrings (Google style)
+- Keep functions focused and single-purpose
+- Use meaningful variable names
+
+### Testing
+
+- Write unit tests for individual functions
+- Write integration tests for workflows
+- Use fixtures for common test data
+- Mock external API calls in tests
+- Aim for >80% code coverage
+
+## Troubleshooting
+
+### Common Issues
+
+**Import Errors**
+- Ensure dependencies are installed: `uv pip install -e ".[dev]"`
+- Check if you're in the correct virtual environment
+
+**API Failures**
+- Verify API keys in `.env`
+- Check API endpoint configuration in `config/model_config.yaml`
+- Review rate limits and quotas
+
+**Test Failures**
+- Check if test fixtures are correctly set up
+- Verify mock data matches expected structure
+- Review error messages carefully
+
+{% if include_rag -%}
+**Vector DB Issues**
+- Ensure {{ vector_db }} is properly installed
+- Check connection settings in configuration
+- Verify data directory permissions: `data/vectordb/`
+
+{% endif -%}
+## Resources
+
+- [Project README](README.md): User-facing documentation
+- [Configuration](config/): All YAML configuration files
+- [Tests](tests/): Test suite and examples
+{% if include_docker -%}- [Docker Setup](docker-compose.yml): Container configuration{% endif %}
+
+## Metadata
+
+- **Project**: {{ project_name }}
+- **Python Version**: {{ python_version }}
+- **LLM Provider**: {{ provider }}{% if include_rag %}
+- **Vector Database**: {{ vector_db }}{% endif %}
+- **License**: {{ license }}
+- **Author**: {{ author_name }}{% if author_email %} <{{ author_email }}>{% endif %}
+
+---
+
+Generated from [copier-genai](https://github.com/yourorg/copier-genai) template
